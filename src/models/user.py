@@ -21,3 +21,4 @@ class User(Person):
         obj.__Person__password = data['password_hash']
         obj.__favourites = data.get('favourites', [])
         return obj
+

@@ -1,0 +1,34 @@
+from datetime import datetime
+class Show:
+    def __init__(self, show_id: int, date: datetime, name: str):
+        #Validadores para a ID, nome e data do evento
+        if not isinstance(show_id, int):
+            raise ValueError('Show_id must be a positive integer.')
+        if not isinstance(date, datetime):
+            raise ValueError('Date must be a datetime object.')
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError('Name must be a non-empty string.')
+
+
+        self.__show_id = show_id
+        self.__date = date
+        self.__name = name
+
+    def to_dict(self):
+        return {
+            'show_id': self.__show_id,
+            'date': self.__date.strftime('%Y-%m-%d'), #pega o objeto datetime e converte para string para assim armazenar melhor no json
+            'name': self.__name
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Show':
+        data_obj = datetime.strptime(data['date'], '%Y-%m-%d') #aqui faz o contrário do strftime, retorna a data em srt para o seu formato datetime
+        return cls(data['show_id'], data_obj, data['name'])
+
+    @property
+    def date(self) -> datetime:
+        return self.__date
+    @property
+    def name(self) -> str:
+        return self.__name
