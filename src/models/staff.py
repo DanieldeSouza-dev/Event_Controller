@@ -1,9 +1,9 @@
 #zona de importações
 
 from datetime import datetime
-from person import Person
-from user import User
-from shows import Show
+from .person import Person
+from .user import User
+from .shows import Show
 
 #criação de classe Staff
 class Staff(Person):
