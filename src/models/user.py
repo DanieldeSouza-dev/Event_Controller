@@ -1,8 +1,8 @@
 from .person import Person
 
 class User(Person):
-    def __init__(self, user_id: int, name: str, password: str):
-        super().__init__(user_id, name, password)
+    def __init__(self, user_id: int, name: str, password: str, email: str):
+        super().__init__(user_id, name, password, email)
         self.__favorites = []
 
     def to_dict(self) -> dict:
@@ -16,10 +16,11 @@ class User(Person):
     @classmethod
     def from_dict(cls, data: dict) -> 'User':
         obj = cls.__new__(cls)
-        obj.__Person__id = data['id']
-        obj.__Person__name = data['name']
-        obj.__Person__password = data['password_hash']
-        obj.__favorites = data.get('favorites', [])
+        obj._Person__id = data['id']
+        obj._Person__name = data['name']
+        obj._Person__email = data['email']
+        obj._Person__password = data['password_hash']
+        obj._favorites = data.get('favorites', [])
         return obj
 
     # Adicionei o @property para poder resgatar os dados facilmente para testes

@@ -1,9 +1,10 @@
 from passlib.hash import pbkdf2_sha256 # biblioteca que irá armazenar a senha de maneira mais segura
 
 class Person:
-    def __init__(self, user_id, name, password):
+    def __init__(self, user_id, name, password, email):
         self.__id = self.validate_id(user_id)
         self.__name = self.validate_name(name)
+        self.__email = self.validate_email(email)
         valid_password = self.validate_password(password)
         self.__password = self._hash_password(password) #armazena o hash da senha
 
@@ -16,6 +17,11 @@ class Person:
         if not name or not isinstance(name, str):
             raise ValueError("Invalid name")
         return name.strip()
+
+    def validate_email(self, email: str) -> str:
+        if not email or not isinstance(email, str):
+            raise ValueError("Invalid email")
+        return email.strip()
 
     def validate_password(self, password: str) -> str:
         if not isinstance(password, str) or len(password) < 6:
@@ -32,6 +38,7 @@ class Person:
         return {
             'id': self.__id,
             'name': self.__name,
+            'email': self.__email,
             'password_hash': self.__password,
             'is_staff': False
         }
@@ -50,6 +57,10 @@ class Person:
     @property
     def name(self) -> str:
         return self.__name
+
+    @property
+    def email(self) -> str:
+        return self.__email
 
     def __str__(self):
         return f'Person(id={self.__id}, name={self.__name})'
