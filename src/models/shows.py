@@ -32,3 +32,6 @@ class Show:
     @property
     def name(self) -> str:
         return self.__name
+    @property
+    def show_id(self) -> int:
+        return self.__show_id

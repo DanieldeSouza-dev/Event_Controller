@@ -1,6 +1,8 @@
 #zona de importações
 
+from __future__ import annotations
 from datetime import datetime
+from typing import List # Importa uma biblioteca que permite usar um List mais robusto e mais acessivel
 from .person import Person
 from .user import User
 from .shows import Show
@@ -63,7 +65,7 @@ class Staff(Person):
             raise ValueError(f'Invalid show data: {e}')
 
     # Função para ver o usuários cadastrados
-    def view_user(self, users: list) -> list:
+    def view_user(self, users: List) -> List:
         if not isinstance(users, list):
             raise ValueError ('Expected a list of users')
 
@@ -81,3 +83,93 @@ class Staff(Person):
                 print(f'Skipped invalid user entry: {e}')
 
         return displayed_users
+
+    def update_user_name(self, user: User, new_name: str) -> None:
+        user.update_name(new_name)
+
+    def update_user_password(self, user: User, new_password: str) -> None:
+        user.update_password(new_password)
+
+    def register_staff (self, staff_data: dict) -> 'Staff':
+        try:
+            password = staff_data['password']
+            new_staff = Staff(
+                user_id=staff_data['id'],
+                name=staff_data['name'],
+                email=staff_data['email'],
+                password=password
+            )
+            return new_staff
+        except (KeyError, ValueError) as e:
+            raise ValueError(f'Invalid staff data: {e}')
+
+    def view_staff(self, staff_list: List['Staff']) -> List[dict]:
+        if not isinstance(staff_list, list):
+            raise ValueError ('Expected a list of staff')
+
+        displayed_staff = []
+        for staff_member in staff_list:
+            try:
+                staff_info = {
+                    'ID': staff_member.id,
+                    'Name': staff_member.name,
+                    'Email': staff_member.email
+                }
+                print(f'ID:{staff_member.id} | Name:{staff_member.name}')
+                displayed_staff.append(staff_info)
+            except AttributeError as e:
+                print(f'Skipped invalid staff entry: {e}')
+
+        return displayed_staff
+
+    def update_staff_name(self, staff: 'Staff', new_name: str) -> None:
+        staff.update_name(new_name)
+
+    def update_staff_password(self, staff: 'Staff', new_password: str) -> None:
+        staff.update_password(new_password)
+
+    def view_shows(self, show_list: List[Show]) -> List[dict]:
+        if not isinstance(show_list, list):
+            raise ValueError ('Expected a list of shows')
+        displayed_shows = []
+        for show in show_list:
+            try:
+                show_info = {
+                    'ID': show.show_id,
+                    'Name': show.name,
+                    'Date': show.date
+                }
+                print(f'ID:{show.show_id} | Name:{show.name}')
+                displayed_shows.append(show_info)
+            except AttributeError as e:
+                print(f'Skipped invalid show entry: {e}')
+        return displayed_shows
+
+    # Zona criada para deletar usuário, staff e shows caso necessário
+
+    def delete_user(self, users_list: List[User], user_id: int) -> bool:
+        for i, user in enumerate(users_list):
+            if user.id == user_id:
+                del users_list[i]
+                print(f'Deleted user {user.id} from list {i}')
+                return True
+        print(f'User {user_id} not found.')
+        return False
+
+    def delete_staff(self, staff_list: List[Staff], staff_id: int) -> bool:
+        for i, staff in enumerate(staff_list):
+            if staff.id == staff_id:
+                del staff_list[i]
+                print(f'Deleted staff {staff.id} from list {i}')
+                return True
+        print(f'Staff {staff_id} not found.')
+        return False
+
+    def delete_show(self, show_list: List[Show], show_id: int) -> bool:
+        for i, show in enumerate(show_list):
+            if show_id == show_id:
+                del show_list[i]
+                print(f'Deleted show {show.id} from list {i}')
+                return True
+        print(f'Show {show_id} not found.')
+        return False
