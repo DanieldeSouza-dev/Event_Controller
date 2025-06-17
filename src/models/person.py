@@ -1,40 +1,32 @@
-from passlib.hash import pbkdf2_sha256 # biblioteca que irá armazenar a senha de maneira mais segura
+# Zona de importações
+
+from passlib.hash import pbkdf2_sha256
+from src.core.validators import validate_id, validate_name, validate_email, validate_password, validate_cpf
 
 class Person:
-    def __init__(self, user_id, name, password, email):
-        self.__id = self.validate_id(user_id)
-        self.__name = self.validate_name(name)
-        self.__email = self.validate_email(email)
-        valid_password = self.validate_password(password)
+    def __init__(self, user_id, name, password, email, cpf):
+        self.__id = validate_id(user_id)
+        self.__name = validate_name(name)
+        self.__email = validate_email(email)
+        validate_password(password)
         self.__password = self._hash_password(password) #armazena o hash da senha
+        self.__cpf = validate_cpf(cpf)
 
-    def validate_id(self, user_id: int) -> int:
-        if not isinstance(user_id, int) or user_id <=0:
-            raise ValueError("Invalid user_id")
-        return user_id
-
-    def validate_name(self, name: str) -> str:
-        if not name or not isinstance(name, str):
-            raise ValueError("Invalid name")
-        return name.strip()
-
-    def validate_email(self, email: str) -> str:
-        if not email or not isinstance(email, str):
-            raise ValueError("Invalid email")
-        return email.strip()
-
-    def validate_password(self, password: str) -> str:
-        if not isinstance(password, str) or len(password) < 6:
-            raise ValueError("Passwords must be at least 6 characters.")
-        return password
-
+    # Criação de senha em hash
     def _hash_password(self, password: str) -> str:
         return pbkdf2_sha256.hash(password) # aqui a biblioteca vai gerar a senha em hash
 
+    # Verifica se a senha está sendo hasheada
     def verify_password(self, input_password: str) -> bool:
         return pbkdf2_sha256.verify(input_password, self.__password)
 
-    def to_dict(self) -> dict: #prepara a classe para ser salva em JSON (transforma em dicionario os resultados da classe)
+    # Máscara de cpf para maior segurança
+    def masked_cpf(self, cpf: str) -> str:
+        return f'***{self.__cpf[3:6]}.{self.__cpf[6:9]}-**'
+
+
+    # Prepara a classe para ser salva em JSON (transforma em dicionario os resultados da classe)
+    def to_dict(self) -> dict:
         return {
             'id': self.__id,
             'name': self.__name,
@@ -43,13 +35,16 @@ class Person:
             'is_staff': False
         }
 
-    def update_name(self, new_name: str) -> None: #será usado para renomear usuarios/staff já cadastrados
-        self.__name = self.validate_name(new_name)
+    # Zona para fazer alterações de nome e senha futuramente pelo staff
+    def update_name(self, new_name: str) -> None:
+        self.__name = validate_name(new_name)
 
-    def update_password(self, new_password: str) -> None: #será usado para alterar senha de usuario/staff ja cadastrado
-        valid_password = self.validate_password(new_password)
+    def update_password(self, new_password: str) -> None:
+        validate_password(new_password)
         self.__password = self._hash_password(new_password)
 
+
+    # Sessão "@property" usada para acesso de leitura e não de escrita, evita alterações no código fonte.
     @property
     def id(self) -> int:
         return self.__id
@@ -62,8 +57,10 @@ class Person:
     def email(self) -> str:
         return self.__email
 
+    # Útil para a visualização do usuario no print(objeto). Mais legível
     def __str__(self):
-        return f'Person(id={self.__id}, name={self.__name})'
+        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf()})'
 
+    # Útil para dev em debug. Mais preciso
     def __repr__(self):
-        return f'Person(id={self.__id}, name={self.__name})'
+        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf()})'

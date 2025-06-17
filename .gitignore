@@ -10,4 +10,7 @@ __pycache__/
 *.py[cod]
 
 # JSON de dados sensíveis (opcional proteger no futuro)
-src/data/*.json
+src/data/*
+
+# Mantem a pasta vazia commitada para que os usuarios tenha seus bancos de dados locais
+!data/.gitkeep
