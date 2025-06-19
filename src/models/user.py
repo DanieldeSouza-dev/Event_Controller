@@ -1,14 +1,15 @@
 from .person import Person
 
 class User(Person):
-    def __init__(self, user_id: int, name: str, password: str, email: str):
-        super().__init__(user_id, name, password, email)
+    def __init__(self, user_id: int, name: str, email: str, cpf: str,  password: str):
+        super().__init__(user_id, name, email, cpf, password)
         self.__favorites = []
 
 
     def to_dict(self) -> dict:
         user_data = super().to_dict()
         user_data['favorites'] = self.__favorites
+        user_data['masked_cpf'] = self.masked_cpf
         return user_data
 
     # Funções dos usuários:
@@ -33,7 +34,8 @@ class User(Person):
         obj._Person__name = data['name']
         obj._Person__email = data['email']
         obj._Person__password = data['password_hash']
-        obj._favorites = data.get('favorites', [])
+        obj._Person__cpf = data['cpf']
+        obj._User__favorites = data.get('favorites', [])
         return obj
 
     # Adicionei o @property para poder resgatar os dados facilmente para testes

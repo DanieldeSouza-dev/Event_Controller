@@ -9,13 +9,14 @@ from .shows import Show
 
 #criação de classe Staff
 class Staff(Person):
-    def __init__(self, user_id: int, name: str, password: str, email: str):
-        super().__init__(user_id, name, password, email)
+    def __init__(self, user_id: int, name: str, email: str, cpf: str, password: str):
+        super().__init__(user_id, name, email, cpf, password)
 
     #isso aqui vai servir para pegar o formato do dicionario de Person e converte para staff
     def to_dict(self) -> dict:
         staff_data = super().to_dict()
         staff_data['is_staff'] = True
+        staff_data['masked_cpf'] = self.masked_cpf
         return staff_data
 
     @classmethod
@@ -24,6 +25,7 @@ class Staff(Person):
         obj._Person__id = data['id']
         obj._Person__name = data['name']
         obj._Person__email = data['email']
+        obj._Person__cpf = data['cpf']
         obj._Person__password = data['password_hash']
         return obj
 
@@ -80,6 +82,7 @@ class Staff(Person):
                 user_id = user_data['id'],
                 name = user_data['name'],
                 email = user_data['email'],
+                cpf = user_data['cpf'],
                 password = password
             )
             return new_user
@@ -87,7 +90,7 @@ class Staff(Person):
             raise ValueError(f'Invalid user data: {e}')
 
     # Função para ver o usuários cadastrados
-    def view_user(self, users: List) -> List:
+    def view_user(self, users: List[User]) -> List[dict]:
         if not isinstance(users, list):
             raise ValueError ('Expected a list of users')
 
@@ -97,7 +100,8 @@ class Staff(Person):
                 user_info = {
                   'ID': user.id,
                   'Name': user.name,
-                  'Email': user.email
+                  'Email': user.email,
+                  'CPF': user.cpf
                 }
                 print(f'ID:{user.id} | Name:{user.name}')
                 displayed_users.append(user_info)
@@ -121,13 +125,14 @@ class Staff(Person):
                 user_id=staff_data['id'],
                 name=staff_data['name'],
                 email=staff_data['email'],
+                cpf=staff_data['cpf'],
                 password=password
             )
             return new_staff
         except (KeyError, ValueError) as e:
             raise ValueError(f'Invalid staff data: {e}')
 
-    def view_staff(self, staff_list: List['Staff']) -> List[dict]:
+    def view_staff(self, staff_list: List[Staff]) -> List[dict]:
         if not isinstance(staff_list, list):
             raise ValueError ('Expected a list of staff')
 
@@ -137,7 +142,8 @@ class Staff(Person):
                 staff_info = {
                     'ID': staff_member.id,
                     'Name': staff_member.name,
-                    'Email': staff_member.email
+                    'Email': staff_member.email,
+                    'CPF': staff_member.cpf
                 }
                 print(f'ID:{staff_member.id} | Name:{staff_member.name}')
                 displayed_staff.append(staff_info)
@@ -176,7 +182,7 @@ class Staff(Person):
         for i, show in enumerate(show_list):
             if show.show_id == show_id:
                 del show_list[i]
-                print(f'Deleted show {show.id} from list {i}')
+                print(f'Deleted show {show.show_id} from list {i}')
                 return True
         print(f'Show {show_id} not found.')
         return False

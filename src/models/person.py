@@ -4,13 +4,13 @@ from passlib.hash import pbkdf2_sha256
 from src.core.validators import validate_id, validate_name, validate_email, validate_password, validate_cpf
 
 class Person:
-    def __init__(self, user_id, name, password, email, cpf):
+    def __init__(self, user_id, name, email, cpf, password):
         self.__id = validate_id(user_id)
         self.__name = validate_name(name)
         self.__email = validate_email(email)
+        self.__cpf = validate_cpf(cpf)
         validate_password(password)
         self.__password = self._hash_password(password) #armazena o hash da senha
-        self.__cpf = validate_cpf(cpf)
 
     # Criação de senha em hash
     def _hash_password(self, password: str) -> str:
@@ -32,8 +32,8 @@ class Person:
             'id': self.__id,
             'name': self.__name,
             'email': self.__email,
-            'password_hash': self.__password,
             'cpf': self.__cpf,
+            'password_hash': self.__password,
             'is_staff': False
         }
 
@@ -65,8 +65,8 @@ class Person:
 
     # Útil para a visualização do usuario no print(objeto). Mais legível
     def __str__(self):
-        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf()})'
+        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf})'
 
     # Útil para dev em debug. Mais preciso
     def __repr__(self):
-        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf()})'
+        return f'Person(id={self.__id}, name={self.__name}, cpf={self.masked_cpf})'
