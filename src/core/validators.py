@@ -1,3 +1,5 @@
+import re
+
 # Parte das validações:
 def validate_id(user_id: int) -> int:
     if not isinstance(user_id, int) or user_id <= 0:
@@ -22,9 +24,15 @@ def validate_password(password: str) -> str:
         raise ValueError("Passwords must be at least 6 characters.")
     return password
 
+# Limpa o cpf que foi cadastrado para apenas numeros e retorna
+def sanitize_cpf(raw_cpf: str) -> str:
+    if not isinstance(raw_cpf, str):
+        raise ValueError('CPF must be a string')
+    cleaned_cpf = re.sub(r'[\.\-\s]', '', raw_cpf)
+    return cleaned_cpf
 
 def validate_cpf(cpf: str) -> str:
-    cpf = cpf.strip()
+    cpf = sanitize_cpf(cpf)
 
     if not cpf.isdigit():
         raise ValueError("Invalid cpf: must contain only digits")

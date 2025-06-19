@@ -21,8 +21,9 @@ class Person:
         return pbkdf2_sha256.verify(input_password, self.__password)
 
     # Máscara de cpf para maior segurança
-    def masked_cpf(self, cpf: str) -> str:
-        return f'***{self.__cpf[3:6]}.{self.__cpf[6:9]}-**'
+    @property # Tive que colocar o property aqui direto na função para poder pegar ela mais facilmente
+    def masked_cpf(self) -> str:
+        return f'***.{self.__cpf[3:6]}.{self.__cpf[6:9]}-**'
 
 
     # Prepara a classe para ser salva em JSON (transforma em dicionario os resultados da classe)
@@ -32,6 +33,7 @@ class Person:
             'name': self.__name,
             'email': self.__email,
             'password_hash': self.__password,
+            'cpf': self.__cpf,
             'is_staff': False
         }
 
@@ -56,6 +58,10 @@ class Person:
     @property
     def email(self) -> str:
         return self.__email
+    
+    @property # Esse SÓ poderá ser usado no backend e funções internas
+    def cpf(self) -> str:
+        return self.__cpf
 
     # Útil para a visualização do usuario no print(objeto). Mais legível
     def __str__(self):
