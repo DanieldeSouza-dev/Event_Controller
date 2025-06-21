@@ -116,13 +116,87 @@ class TestStaff(unittest.TestCase):
         self.staff.update_user_password(user, 'novasenha123456')
         self.assertTrue(user.verify_password('novasenha123456'))
 
-    # Still in progress:
-    
-    """def tes_update_staff_name(self):
+       
+    def test_update_staff_name(self):
+        staff_data = {
+            'id': 9,
+            'name': 'Alana',
+            'email': 'alana@gmail.com',
+            'cpf': '793.292.250-04',
+            'password': '87620583ii1'
+        }
+        staff = self.staff.register_staff(staff_data)
+        self.staff.update_staff_name(staff, 'Nana')
+        self.assertEqual(staff.name, 'Nana')
+        print('\nNew staff name: ', staff.to_dict())
+        self.assertTrue(True)
+
     def test_update_staff_password(self):
+        staff_data = {
+            'id': 10,
+            'name': 'Maria',
+            'email': 'mari@gmail.com',
+            'cpf': '304.306.630-80',
+            'password': '87620583ii1'
+        }
+        staff = self.staff.register_staff(staff_data)
+        self.staff.update_staff_password(staff, 'novasenha123')
+        self.assertTrue(staff.verify_password('novasenha123'))
+
     
     # Teste de funcionalidade (delete)
 
     def test_delete_user(self):
+        user_data = {
+            'id': 11,
+            'name': 'Daniel',
+            'email': 'dani@gmail.com',
+            'cpf': '894.909.640-42',
+            'password': 'senha12345'
+        }
+        user = self.staff.register_user(user_data)
+
+        user_list = [user] # Transforma o dicionário de usuario em uma lista pois é como a função delete_user espera que retorne
+        print('\nBefore delete: ', user.to_dict()) # Mostra como está a lista antes da função
+
+        result = self.staff.delete_user(user_list, 11)
+
+        self.assertTrue(result) # Verifica o resultado, se estiver limpo retorna True, caso contrário False
+        self.assertEqual(len(user_list), 0) # Verifica se a quantidade de itens é igual a 0 
+        print('After delete: ', user_list) # Mostra com deveria ficar após a execução correta da função
+
     def test_delete_staff(self):
-    def test_delete_show(self):"""
+        staff_data = {
+            'id': 12,
+            'name': 'Daniel',
+            'email': 'dani@gmail.com',
+            'cpf': '894.909.640-42',
+            'password': 'senha12345'
+        }
+        staff = self.staff.register_staff(staff_data)
+
+        staff_list = [staff]
+        print('\nBefore delete: ',staff.to_dict())
+
+        result = self.staff.delete_staff(staff_list, 12)
+
+        self.assertTrue(result)
+        self.assertEqual(len(staff_list), 0)
+        print('After delete: ', staff_list)
+
+    def test_delete_show(self):
+        show_data = {
+            'id': 6,
+            'name': 'Viradão',
+            'date': '2025-06-21'
+        }
+        show = self.staff.register_show(show_data)
+
+        show_list = [show]
+        print('\nBefore delete: ', show.to_dict())
+
+        result = self.staff.delete_show(show_list, 6)
+
+        self.assertTrue(result)
+        self.assertEqual(len(show_list), 0)
+        print('After delete:', show_list)

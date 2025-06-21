@@ -35,3 +35,11 @@ class Show:
     @property
     def show_id(self) -> int:
         return self.__show_id
+    
+    # Útil para a visualização do usuario no print(objeto). Mais legível
+    def __str__(self):
+        return f'{self.name} ID: {self.show_id} - {self.date.strftime('%d/%m/%Y')}'
+
+    # Útil para dev em debug. Mais preciso
+    def __repr__(self):
+        return f'Show(id={self.show_id}, name={self.name}, date={self.date.strftime('%d/%m/%Y')})'
