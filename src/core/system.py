@@ -1,0 +1,38 @@
+# Zona de importações
+
+from src.core.authentication import authenticate_staff, authenticate_user
+from src.models.staff import Staff
+from src.models.user import User
+from src.models.shows import Show
+
+class SystemController:
+    def __init__(self, users: list[User], staff: list[Staff], show: list[Show]):
+        self.users = users
+        self.staff = staff
+        self.show = show
+        self.current_user = None # Serve para armazenar o usuário que está usando no momento
+        self.current_staff = None # Serve para armazenar o funcionário que está usando no momento
+
+    def login_user(self, user_id: int, password: str) -> bool:
+        user = authenticate_user(user_id, password, self.users)
+        if user:
+            self.current_user = user
+            return True
+        return False
+
+    def login_staff(self, staff_id: int, password: str) -> bool:
+        staff = authenticate_staff(staff_id, password, self.staff)
+        if staff:
+            self.current_staff = staff
+            return True
+        return False
+
+    def loggout(self):
+        self.current_user = None
+        self.current_staff = None
+
+    def get_logged_user(self):
+        return self.current_user
+    
+    def get_logged_staff(self):
+        return self.current_staff
