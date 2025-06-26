@@ -27,6 +27,18 @@ class SystemController:
             return True
         return False
 
+    def find_user_by_id(self, user_id: int) -> User | None:
+        for user in self.users:
+            if user.id == user_id:
+                return user
+        return None
+    
+    def find_staff_by_id(self, staff_id: int) -> Staff | None:
+        for staff in self.staff:
+            if staff.id == staff_id:
+                return staff
+        return None
+    
     def loggout(self):
         self.current_user = None
         self.current_staff = None
