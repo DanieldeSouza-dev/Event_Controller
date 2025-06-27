@@ -371,13 +371,60 @@ class Interface:
 
     # Funções Staff (Visualizar)
     def view_all_users(self):
-        pass
+        self.clear_screen()
+        print('=== View All Users ===')
+
+        try:
+            logged_staff = self.system.get_logged_staff()
+            if not logged_staff:
+                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
+            else: 
+                users = self.system.users
+                if not users:
+                    print('\033[0:33:0mNo users registered.\033[0m')
+                else:
+                    logged_staff.view_user(users)
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')
 
     def view_all_staffs(self):
-        pass
+        self.clear_screen()
+        print('=== View All Staffs ===')
+
+        try:
+            logged_staff = self.system.get_logged_staff()
+            if not logged_staff:
+                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
+            else:
+                staffs = self.system.staff
+                logged_staff.view_staff(staffs)
+
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')
 
     def view_all_shows(self):
-        pass
+        self.clear_screen()
+        print('=== View All Shows ===')
+
+        try:
+            logged_staff = self.system.get_logged_staff()
+            if not logged_staff:
+                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
+            else:
+                shows = self.system.show
+                if not shows:
+                    print('\033[0:33:0mNo shows registered.\033[0m')
+                else:
+                    logged_staff.view_shows(shows)
+
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')
 
     # Loggout
     def logout_staff(self):
@@ -498,11 +545,11 @@ class Interface:
                 continue
 
             if option == 1:
-                self.register_user_flow()
+                self.remove_user_flow()
             elif option == 2:
-                self.register_staff_flow()
+                self.remove_staff_flow()
             elif option == 3:
-                self.register_show_flow()
+                self.remove_show_flow()
             elif option == 0:
                 break
             else:
@@ -540,13 +587,92 @@ class Interface:
 
     # Funções de User
     def view_all_shows_user(self):
-        pass
+        self.clear_screen()
+        print('=== View All Shows ===')
+
+        try:
+            logged_user = self.system.get_logged_user()
+            if not logged_user:
+                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
+            else:
+                shows = self.system.show
+                if not shows:
+                    print('\033[0:33:0mNo shows available.\033[0m')
+                else:
+                    logged_user.view_shows(shows)
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')    
+
     def add_show_to_favorite(self):
-        pass
+        self.clear_screen()
+        print('=== Add Show To Favorites ===')
+
+        try:
+            logged_user = self.system.get_logged_user()
+            if not logged_user:
+                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
+            else:
+                show_id = self._safe_int_input('Enter the Show ID: ')
+                if show_id is None:
+                    raise ValueError ('Show ID must be a number.')
+                
+                show_exists = any(show.show_id == show_id for show in self.system.show)
+                if not show_exists:
+                    print('\033[0:31:0mShow not found.\033[0m')
+                else:
+                    logged_user.add_favorites(show_id)
+
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')
+
     def remove_show_from_favorite(self):
-        pass
+        self.clear_screen()
+        print('=== Remove Show From Favorites ===')
+
+        try:
+            logged_user = self.system.get_logged_user()
+            if not logged_user:
+                print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
+            else:
+                show_id = self._safe_int_input('Enter the Show ID: ')
+                if show_id is None:
+                    raise ValueError('Show ID must be a number.')
+
+                success = logged_user.remove_favorites(show_id)
+                if success:
+                    print('\033[0;32mShow removed from favorites.\033[0m')
+                else:
+                    print('\033[0;33mShow not found in favorites.\033[0m')
+
+        except Exception as e:
+            print(f'\033[0;31mError: {str(e)}\033[0m')
+
+        input('Press Enter to continue...')
+
     def view_favorite_shows(self):
-        pass
+        self.clear_screen()
+        print('=== View All Favorites ===')
+
+        try:
+            logged_user = self.system.get_logged_user()
+            if not logged_user:
+                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
+            else:
+                favorites = logged_user.favorite_shows
+                if not favorites:
+                    print('\033[0:33:0mYou have no favorite shows.\033[0m')
+                else:
+                    for show in favorites:
+                        print(f'ID: {show.show_id} | Name: {show.name} | Date: {show.date}')
+        except Exception as e:
+            print(f'\033[0:31:0mError: {str(e)}\033[0m')
+        
+        input('Press Enter to continue...')
+
     def logout_user(self):
         print('\033[0:33:0mUser logged out.\033[0m')
         input('Press Enter to return to login menu...')
