@@ -1,5 +1,8 @@
 # Importações de módulos
 from src.core.system import SystemController
+from src.core.menu_functions.staff_menu_functions import Staff_Functions
+from src.core.menu_functions.user_menu_functions import User_Functions
+from src.core.validators import _safe_int_input
 from src.models.staff import Staff
 from src.models.user import User
 from src.models.shows import Show
@@ -11,6 +14,8 @@ from datetime import datetime
 class Interface:
     def __init__(self, system: SystemController):
         self.system = system
+        self.staff_functions = Staff_Functions(self.system)
+        self.user_functions = User_Functions(self.system)
 
     # Funções básicas
     def clear_screen(self):
@@ -24,13 +29,6 @@ class Interface:
                 self.show_user_menu()
             else:
                 self.show_login_menu()
-
-    # Valida se o número digitado era um número inteiro mesmo ou se era outra coisa
-    def _safe_int_input(self, prompt: str) -> int | None:
-        try:
-            return int(input(prompt))
-        except ValueError:
-            return None
     
     # Menu inicial
     def show_login_menu(self):
@@ -40,7 +38,7 @@ class Interface:
             print('[1] Login User')
             print('[2] Login Staff')
             print('[0] Exit')
-            choice = self._safe_int_input('Select an option: ')
+            choice = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if choice is None:
@@ -63,7 +61,10 @@ class Interface:
     def login_staff_flow(self):
         self.clear_screen()
         try:
-            staff_id = int(input('Staff ID: '))
+            staff_id = _safe_int_input('Staff ID: ')
+            if staff_id is None:
+                raise ValueError ('Staff ID must be numbers.')
+
             password = input('Password: ')
             if self.system.login_staff(staff_id, password):
                 print('\033[0:32:0mStaff logged in successfully!\033[0m')
@@ -77,7 +78,10 @@ class Interface:
     def login_user_flow(self):
         self.clear_screen()
         try:
-            user_id = int(input('User ID: '))
+            user_id = _safe_int_input('User ID: ')
+            if user_id is None:
+                raise ValueError ('User ID must be numbers.')
+            
             password = input('Password: ')
             if self.system.login_user(user_id, password):
                 print('\033[0:32:0mUser logged in succesfully!\033[0m')
@@ -86,352 +90,6 @@ class Interface:
         except ValueError:
             print('\033[0:31:0mInvalid input. ID must be a number.\033[0m')
         input('Press Enter to continue...')
-
-
-    # Funções de Staff (Registrar)
-    def register_user_flow(self):
-        self.clear_screen()
-        print('=== Register New User ===')
-
-        try:
-            # Coleta de dados e valida ID
-            user_id = self._safe_int_input('User ID: ')
-            if user_id is None:
-                raise ValueError ('User ID must be a number.')
-
-            user_name = str(input('User name: ')).strip()
-            user_email = input('User email: ').strip()
-            user_cpf = input('User CPF: ').strip()
-            user_password = input('User password: ').strip()
-
-            # Criação de User
-            new_user = User(user_id, user_name, user_email, user_cpf, user_password)
-            
-            # Registro via staff logado:
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Cannot register user.\033[0m')
-            else:
-                logged_staff.register_user(new_user)
-                print('\033[0:32:0mUser registered successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def register_staff_flow(self):
-        self.clear_screen()
-        print('=== Register New Staff ===')
-
-        try:
-            # Coleta de dados e valida ID
-            staff_id = self._safe_int_input('Staff ID: ')
-            if staff_id is None:
-                raise ValueError ('Staff ID must be a number.')
-            
-            staff_name = input('Staff name: ').strip()
-            staff_email = input('Staff email').strip()
-            staff_cpf = input('Staff CPF: ').strip()
-            staff_password = input('Staff password: ').strip()
-
-            # Criação de staff
-            new_staff = Staff(staff_id, staff_name, staff_email, staff_cpf, staff_password)
-
-            # Registro via staff logado
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Cannot register staff.\033[0m')
-            else:
-                logged_staff.register_staff(new_staff)
-                print('\033[0:32:0mStaff registered successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def register_show_flow(self):
-        self.clear_screen()
-        print('=== Register New Show ===')
-
-        try:
-            # Coleta de dados e valida ID
-            show_id = self._safe_int_input('Show ID: ')
-            if show_id is None:
-                raise ValueError ('Show ID must be a number.')
-            
-            show_date = input('Show date (YYYY-MM-DD): ').strip()
-            show_name = input('Show name: ').strip()
-
-            # Validação de data
-            try:
-                show_date_obj = datetime.strptime(show_date, '%Y-%m-%d')
-            except ValueError:
-                raise ValueError ('Date must be in format YYYY-MM-DD.')
-
-            # Criação de show
-            new_show = Show(show_id, show_date_obj, show_name)
-
-            # Registro via staff logado
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Cannot register show.\033[0m')
-            else:
-                logged_staff.register_show(new_show)
-                print('\033[0:32:0mShow registered successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    # Funções Staff (Atualizar)
-    def update_user_name(self):
-        self.clear_screen()
-        print('=== Update User Name ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            user_id = self._safe_int_input('Enter the User ID: ')
-            if user_id is None:
-                raise ValueError ('User ID must be a number.')
-            
-            new_name = input('Enter the new user name: ').strip()
-            user = self.system.find_user_by_id(user_id)
-
-            if user: 
-                logged_staff = self.system.get_logged_staff()
-                if not logged_staff:
-                    print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-                else:
-                    logged_staff.update_user_name(user, new_name)
-                    print('\033[0:32:0mUser name updated successfully!\033[0m')
-            else:
-                print('\033[0:31:0mUser not found.\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-
-        input('Press Enter to continue...')
-
-    def update_user_password(self):
-        self.clear_screen()
-        print('=== Update User Passoword ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            user_id = self._safe_int_input('Enter the User ID: ')
-            if user_id is None:
-                raise ValueError ('User ID must be a number.')
-            
-            new_password = input('Enter the new user password: ').strip()
-            user = self.system.find_user_by_id(user_id)
-
-            if user:
-                logged_staff = self.system.get_logged_staff()
-                if not logged_staff:
-                    print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-                else: 
-                    logged_staff.update_user_password(user, new_password)
-                    print('\033[0:32:0mUser password updated successfully!\033[0m')
-            else:
-                print('\033[0:31:0mUser not found.\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-
-        input('Press Enter to continue...')
-
-    def update_staff_name(self):
-        self.clear_screen()
-        print('=== Update Staff Name ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            staff_id = self._safe_int_input('Enter the Staff ID: ')
-            if staff_id is None:
-                raise ValueError ('Staff ID must be a number.')
-            
-            new_name = input('Enter the new staff name: ').strip()
-            staff = self.system.find_staff_by_id(staff_id)
-
-            if staff:
-                logged_staff = self.system.get_logged_staff()
-                if not logged_staff:
-                    print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-                else:
-                    logged_staff.update_staff_name(staff, new_name)
-                    print('\033[0:32:0mStaff name updated successfully!\033[0m')
-            else:
-                print('\033[0:31:0mStaff not found.\033[0m')
-        
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-
-        input('Press Enter to continue....')
-
-    def update_staff_password(self):
-        self.clear_screen()
-        print('=== Update Staff Password ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            staff_id = self._safe_int_input('Enter the Staff ID')
-            if staff_id is None:
-                raise ValueError ('Staff ID must be a number.')
-            
-            new_password = input('Enter the new staff password: ').strip()
-            staff = self.system.find_staff_by_id(staff_id)
-
-            if staff:
-                logged_staff = self.system.get_logged_staff()
-                if not logged_staff:
-                    print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-                else:
-                    logged_staff.update_staff_password(staff, new_password)
-                    print('\033[0:32:0mStaff password updated successfully!\033[0m')
-            else:
-                print('\033[0:31:0mStaff not found.\033[0m')
-        
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    # Funções Staff (Remover)
-    def remove_user_flow(self):
-        self.clear_screen()
-        print('=== Remove User ===')
-
-        try:
-            # Coleta do ID de usuário para remoção
-            user_id = self._safe_int_input('Enter the User ID to remove: ')
-            if user_id is None:
-                raise ValueError ('User ID must be a number.')
-
-            # Validação se o Staff está logado
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[:31mNo staff logged in. Operation not allowed.\033[0m')
-            else:
-                logged_staff.delete_user(user_id)
-                print('\033[:32mUser removed successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def remove_staff_flow(self):
-        self.clear_screen()
-        print('=== Remove Staff ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            staff_id = self._safe_int_input('Enter the Staff ID to remove: ')
-            if staff_id is None:
-                raise ValueError ('Staff ID must be a number.')
-            
-            # Validação se o staff está logado
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[:31mNo staff logged in. Operation not allowed.\033[0m')
-            else:
-                logged_staff.delete_staff(staff_id)
-                print('\033[:32mStaff removed successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def remove_show_flow(self):
-        self.clear_screen()
-        print('=== Remove Show ===')
-
-        try:
-            # Coleta de dados e validação de ID
-            show_id = self._safe_int_input('Enter the show ID to remove: ')
-            if show_id is None:
-                raise ValueError ('Show ID must be a number.')
-
-            # Validação se o staff está logado
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[:31mNo staff logged in. Operation not allowed.\033[0m')
-            else:
-                logged_staff.delete_show(show_id)
-                print('\033[:32mShow removed successfully!\033[0m')
-
-        except ValueError as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    # Funções Staff (Visualizar)
-    def view_all_users(self):
-        self.clear_screen()
-        print('=== View All Users ===')
-
-        try:
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-            else: 
-                users = self.system.users
-                if not users:
-                    print('\033[0:33:0mNo users registered.\033[0m')
-                else:
-                    logged_staff.view_user(users)
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def view_all_staffs(self):
-        self.clear_screen()
-        print('=== View All Staffs ===')
-
-        try:
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-            else:
-                staffs = self.system.staff
-                logged_staff.view_staff(staffs)
-
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def view_all_shows(self):
-        self.clear_screen()
-        print('=== View All Shows ===')
-
-        try:
-            logged_staff = self.system.get_logged_staff()
-            if not logged_staff:
-                print('\033[0:31:0mNo staff logged in. Operation not allowed.\033[0m')
-            else:
-                shows = self.system.show
-                if not shows:
-                    print('\033[0:33:0mNo shows registered.\033[0m')
-                else:
-                    logged_staff.view_shows(shows)
-
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    # Loggout
-    def logout_staff(self):
-        self.system.loggout()
-        print('\033[0:33:0mStaff logged out.\033[0m')
-        input('Press Enter to return to login menu...')
-
 
     # Menu de funcionalidade Staff
     def show_staff_menu(self):
@@ -444,7 +102,7 @@ class Interface:
             print('[4] View')
             print('[5] Logout')
             print('[0] Exit System')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -461,7 +119,7 @@ class Interface:
             elif option == 4:
                 self.show_view_menu()
             elif option == 5:
-                self.logout_staff()
+                self.staff_functions.logout_staff()
             elif option == 0:
                 exit()
             else:
@@ -477,7 +135,7 @@ class Interface:
             print('[2] Register new staff')
             print('[3] Register new show')
             print('[0] Back')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -486,11 +144,11 @@ class Interface:
                 continue
 
             if option == 1:
-                self.register_user_flow()
+                self.staff_functions.register_user_flow()
             elif option == 2:
-                self.register_staff_flow()
+                self.staff_functions.register_staff_flow()
             elif option == 3:
-                self.register_show_flow()
+                self.staff_functions.register_show_flow()
             elif option == 0:
                 break
             else:
@@ -506,7 +164,7 @@ class Interface:
             print('[3] Update staff name')
             print('[4] Update staff password')
             print('[0] Back')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -515,13 +173,13 @@ class Interface:
                 continue
 
             if option == 1:
-                self.update_user_name()
+                self.staff_functions.update_user_name()
             elif option == 2:
-                self.update_user_password()
+                self.staff_functions.update_user_password()
             elif option == 3:
-                self.update_staff_name()
+                self.staff_functions.update_staff_name()
             elif option == 4:
-                self.update_staff_password()
+                self.staff_functions.update_staff_password()
             elif option == 0:
                 break
             else:
@@ -536,7 +194,7 @@ class Interface:
             print('[2] Remove staff')
             print('[3] Remove show')
             print('[0] Back')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -545,11 +203,11 @@ class Interface:
                 continue
 
             if option == 1:
-                self.remove_user_flow()
+                self.staff_functions.remove_user_flow()
             elif option == 2:
-                self.remove_staff_flow()
+                self.staff_functions.remove_staff_flow()
             elif option == 3:
-                self.remove_show_flow()
+                self.staff_functions.remove_show_flow()
             elif option == 0:
                 break
             else:
@@ -564,7 +222,7 @@ class Interface:
             print('[2] View  all staffs')
             print('[3] View  all shows')
             print('[0] Back')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -573,109 +231,16 @@ class Interface:
                 continue
 
             if option == 1:
-                pass
+                self.staff_functions.view_all_users()
             elif option == 2:
-                pass
+                self.staff_functions.view_all_staffs()
             elif option == 3:
-                pass
+                self.staff_functions.view_all_shows()
             elif option == 0:
                 break
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
                 input('Press Enter to continue...')
-
-
-    # Funções de User
-    def view_all_shows_user(self):
-        self.clear_screen()
-        print('=== View All Shows ===')
-
-        try:
-            logged_user = self.system.get_logged_user()
-            if not logged_user:
-                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                shows = self.system.show
-                if not shows:
-                    print('\033[0:33:0mNo shows available.\033[0m')
-                else:
-                    logged_user.view_shows(shows)
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')    
-
-    def add_show_to_favorite(self):
-        self.clear_screen()
-        print('=== Add Show To Favorites ===')
-
-        try:
-            logged_user = self.system.get_logged_user()
-            if not logged_user:
-                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                show_id = self._safe_int_input('Enter the Show ID: ')
-                if show_id is None:
-                    raise ValueError ('Show ID must be a number.')
-                
-                show_exists = any(show.show_id == show_id for show in self.system.show)
-                if not show_exists:
-                    print('\033[0:31:0mShow not found.\033[0m')
-                else:
-                    logged_user.add_favorites(show_id)
-
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def remove_show_from_favorite(self):
-        self.clear_screen()
-        print('=== Remove Show From Favorites ===')
-
-        try:
-            logged_user = self.system.get_logged_user()
-            if not logged_user:
-                print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                show_id = self._safe_int_input('Enter the Show ID: ')
-                if show_id is None:
-                    raise ValueError('Show ID must be a number.')
-
-                success = logged_user.remove_favorites(show_id)
-                if success:
-                    print('\033[0;32mShow removed from favorites.\033[0m')
-                else:
-                    print('\033[0;33mShow not found in favorites.\033[0m')
-
-        except Exception as e:
-            print(f'\033[0;31mError: {str(e)}\033[0m')
-
-        input('Press Enter to continue...')
-
-    def view_favorite_shows(self):
-        self.clear_screen()
-        print('=== View All Favorites ===')
-
-        try:
-            logged_user = self.system.get_logged_user()
-            if not logged_user:
-                print('\033[0:31:0mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                favorites = logged_user.favorite_shows
-                if not favorites:
-                    print('\033[0:33:0mYou have no favorite shows.\033[0m')
-                else:
-                    for show in favorites:
-                        print(f'ID: {show.show_id} | Name: {show.name} | Date: {show.date}')
-        except Exception as e:
-            print(f'\033[0:31:0mError: {str(e)}\033[0m')
-        
-        input('Press Enter to continue...')
-
-    def logout_user(self):
-        print('\033[0:33:0mUser logged out.\033[0m')
-        input('Press Enter to return to login menu...')
 
     # Menu de funcionalidade User
     def show_user_menu(self):
@@ -688,7 +253,7 @@ class Interface:
             print('[4] View favourite shows')
             print('[5] Logout')
             print('[0] Exit system')
-            option = self._safe_int_input('Select an option: ')
+            option = _safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -697,15 +262,15 @@ class Interface:
                 continue
 
             if option == 1:
-                self.view_all_shows_user()
+                self.user_functions.view_all_shows_user()
             elif option == 2:
-                self.add_show_to_favorite()
+                self.user_functions.add_show_to_favorite()
             elif option == 3:
-                self.remove_show_from_favorite()
+                self.user_functions.remove_show_from_favorite()
             elif option == 4:
-                self.view_favorite_shows()
+                self.user_functions.view_favorite_shows()
             elif option == 5:
-                self.logout_user()
+                self.user_functions.logout_user()
             elif option == 0:
                 exit()
             else:
