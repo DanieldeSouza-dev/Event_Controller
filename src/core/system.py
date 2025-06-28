@@ -1,5 +1,4 @@
-# Zona de importações
-
+import os
 from src.core.authentication import authenticate_staff, authenticate_user
 from src.models.staff import Staff
 from src.models.user import User
@@ -10,8 +9,8 @@ class SystemController:
         self.users = users
         self.staff = staff
         self.show = show
-        self.current_user = None # Serve para armazenar o usuário que está usando no momento
-        self.current_staff = None # Serve para armazenar o funcionário que está usando no momento
+        self.current_user = None  # Usuário logado
+        self.current_staff = None  # Staff logado
 
     def login_user(self, user_id: int, password: str) -> bool:
         user = authenticate_user(user_id, password, self.users)
@@ -32,19 +31,35 @@ class SystemController:
             if user.id == user_id:
                 return user
         return None
-    
+
     def find_staff_by_id(self, staff_id: int) -> Staff | None:
         for staff in self.staff:
             if staff.id == staff_id:
                 return staff
         return None
-    
-    def loggout(self):
+
+    @staticmethod
+    def clear_screen():
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    def logout_user(self):
         self.current_user = None
+
+    def logout_staff(self):
         self.current_staff = None
+
+    def logout(self):
+        self.logout_user()
+        self.logout_staff()
 
     def get_logged_user(self):
         return self.current_user
-    
+
     def get_logged_staff(self):
         return self.current_staff
+
+    def is_user_logged(self) -> bool:
+        return self.current_user is not None
+
+    def is_staff_logged(self) -> bool:
+        return self.current_staff is not None
