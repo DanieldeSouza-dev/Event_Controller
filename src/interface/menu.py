@@ -1,25 +1,15 @@
 # Importações de módulos
 from src.core.system import SystemController
-from src.core.menu_functions.staff_menu_functions import Staff_Functions
-from src.core.menu_functions.user_menu_functions import User_Functions
+from src.core.menu_functions.staff_menu_functions import StaffFunctions
+from src.core.menu_functions.user_menu_functions import UserFunctions
 from src.core.validators import safe_int_input
-from src.models.staff import Staff
-from src.models.user import User
-from src.models.shows import Show
 
-# Importação de funcionalidade
-import os
-from datetime import datetime
 
 class Interface:
     def __init__(self, system: SystemController):
         self.system = system
-        self.staff_functions = Staff_Functions(self.system)
-        self.user_functions = User_Functions(self.system)
-
-    # Funções básicas
-    def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        self.staff_functions = StaffFunctions(self.system)
+        self.user_functions = UserFunctions(self.system)
 
     def run(self):
         while True:
@@ -29,18 +19,17 @@ class Interface:
                 self.show_user_menu()
             else:
                 self.show_login_menu()
-    
+
     # Menu inicial
     def show_login_menu(self):
         while True:
-            self.clear_screen()
+            self.system.clear_screen()
             print('=== Login Menu ===')
             print('[1] Login User')
             print('[2] Login Staff')
             print('[0] Exit')
             choice = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if choice is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -59,11 +48,11 @@ class Interface:
 
     # Menu de Login Staff
     def login_staff_flow(self):
-        self.clear_screen()
+        self.system.clear_screen()
         try:
             staff_id = safe_int_input('Staff ID: ')
             if staff_id is None:
-                raise ValueError ('Staff ID must be numbers.')
+                raise ValueError('Staff ID must be a number.')
 
             password = input('Password: ')
             if self.system.login_staff(staff_id, password):
@@ -71,22 +60,22 @@ class Interface:
             else:
                 print('\033[0:31:0mLogin failed. Check your ID or password.\033[0m')
         except ValueError:
-            print('\033[0:31:0mInvalid input. Id must be a number.\033[0m')
+            print('\033[0:31:0mInvalid input. ID must be a number.\033[0m')
         input('Press Enter to continue...')
 
     # Menu de Login User
     def login_user_flow(self):
-        self.clear_screen()
+        self.system.clear_screen()
         try:
             user_id = safe_int_input('User ID: ')
             if user_id is None:
-                raise ValueError ('User ID must be numbers.')
-            
+                raise ValueError('User ID must be a number.')
+
             password = input('Password: ')
             if self.system.login_user(user_id, password):
-                print('\033[0:32:0mUser logged in succesfully!\033[0m')
+                print('\033[0:32:0mUser logged in successfully!\033[0m')
             else:
-                print('\033[0:31:0mLogin failed. Please check your Id or password.\033[0m')
+                print('\033[0:31:0mLogin failed. Please check your ID or password.\033[0m')
         except ValueError:
             print('\033[0:31:0mInvalid input. ID must be a number.\033[0m')
         input('Press Enter to continue...')
@@ -94,8 +83,9 @@ class Interface:
     # Menu de funcionalidade Staff
     def show_staff_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== Staff Menu | Logged: {self.system.get_logged_staff().name} ===')
+            self.system.clear_screen()
+            logged_staff = self.system.get_logged_staff()
+            print(f'=== Staff Menu | Logged: {logged_staff.name} ===')
             print('[1] Register')
             print('[2] Update')
             print('[3] Remove')
@@ -104,7 +94,6 @@ class Interface:
             print('[0] Exit System')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -122,6 +111,7 @@ class Interface:
                 self.staff_functions.logout_staff()
                 print('\033[0:32:0mStaff logged out successfully.\033[0m')
                 input('Press Enter to continue...')
+                break
             elif option == 0:
                 print("Thanks for using Event_Control. Goodbye!")
                 exit()
@@ -129,18 +119,16 @@ class Interface:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
                 input('Press Enter to continue...')
 
-    # Menu de funcionalidade
     def show_register_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== Staff Menu | Register ===')
+            self.system.clear_screen()
+            print('=== Staff Menu | Register ===')
             print('[1] Register new user')
             print('[2] Register new staff')
             print('[3] Register new show')
             print('[0] Back')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -160,8 +148,8 @@ class Interface:
 
     def show_update_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== Staff Menu | Update ===')
+            self.system.clear_screen()
+            print('=== Staff Menu | Update ===')
             print('[1] Update user name')
             print('[2] Update user password')
             print('[3] Update staff name')
@@ -169,7 +157,6 @@ class Interface:
             print('[0] Back')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -191,15 +178,14 @@ class Interface:
 
     def show_remove_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== Staff Menu | Remove ===')
+            self.system.clear_screen()
+            print('=== Staff Menu | Remove ===')
             print('[1] Remove user')
             print('[2] Remove staff')
             print('[3] Remove show')
             print('[0] Back')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -219,15 +205,14 @@ class Interface:
 
     def show_view_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== Staff Menu | View ===')
-            print('[1] View  all users')
-            print('[2] View  all staffs')
-            print('[3] View  all shows')
+            self.system.clear_screen()
+            print('=== Staff Menu | View ===')
+            print('[1] View all users')
+            print('[2] View all staffs')
+            print('[3] View all shows')
             print('[0] Back')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -248,8 +233,9 @@ class Interface:
     # Menu de funcionalidade User
     def show_user_menu(self):
         while True:
-            self.clear_screen()
-            print(f'=== User Menu | Logged: {self.system.get_logged_user().name} ===')
+            self.system.clear_screen()
+            logged_user = self.system.get_logged_user()
+            print(f'=== User Menu | Logged: {logged_user.name} ===')
             print('[1] View all shows')
             print('[2] Add show to favourite')
             print('[3] Remove show from favourite')
@@ -258,7 +244,6 @@ class Interface:
             print('[0] Exit system')
             option = safe_int_input('Select an option: ')
 
-            # Validação primária de número
             if option is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
@@ -276,6 +261,7 @@ class Interface:
                 self.user_functions.logout_user()
                 print('\033[0:32:0mUser logged out successfully.\033[0m')
                 input('Press Enter to continue...')
+                break
             elif option == 0:
                 print("Thanks for using Event_Control. Goodbye!")
                 exit()
