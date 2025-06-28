@@ -2,7 +2,7 @@
 from src.core.system import SystemController
 from src.core.menu_functions.staff_menu_functions import Staff_Functions
 from src.core.menu_functions.user_menu_functions import User_Functions
-from src.core.validators import _safe_int_input
+from src.core.validators import safe_int_input
 from src.models.staff import Staff
 from src.models.user import User
 from src.models.shows import Show
@@ -38,7 +38,7 @@ class Interface:
             print('[1] Login User')
             print('[2] Login Staff')
             print('[0] Exit')
-            choice = _safe_int_input('Select an option: ')
+            choice = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if choice is None:
@@ -61,7 +61,7 @@ class Interface:
     def login_staff_flow(self):
         self.clear_screen()
         try:
-            staff_id = _safe_int_input('Staff ID: ')
+            staff_id = safe_int_input('Staff ID: ')
             if staff_id is None:
                 raise ValueError ('Staff ID must be numbers.')
 
@@ -78,7 +78,7 @@ class Interface:
     def login_user_flow(self):
         self.clear_screen()
         try:
-            user_id = _safe_int_input('User ID: ')
+            user_id = safe_int_input('User ID: ')
             if user_id is None:
                 raise ValueError ('User ID must be numbers.')
             
@@ -102,7 +102,7 @@ class Interface:
             print('[4] View')
             print('[5] Logout')
             print('[0] Exit System')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -138,7 +138,7 @@ class Interface:
             print('[2] Register new staff')
             print('[3] Register new show')
             print('[0] Back')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -167,7 +167,7 @@ class Interface:
             print('[3] Update staff name')
             print('[4] Update staff password')
             print('[0] Back')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -197,7 +197,7 @@ class Interface:
             print('[2] Remove staff')
             print('[3] Remove show')
             print('[0] Back')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -225,7 +225,7 @@ class Interface:
             print('[2] View  all staffs')
             print('[3] View  all shows')
             print('[0] Back')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
@@ -256,7 +256,7 @@ class Interface:
             print('[4] View favourite shows')
             print('[5] Logout')
             print('[0] Exit system')
-            option = _safe_int_input('Select an option: ')
+            option = safe_int_input('Select an option: ')
 
             # Validação primária de número
             if option is None:
