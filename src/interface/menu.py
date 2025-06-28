@@ -120,7 +120,10 @@ class Interface:
                 self.show_view_menu()
             elif option == 5:
                 self.staff_functions.logout_staff()
+                print('\033[0:32:0mStaff logged out successfully.\033[0m')
+                input('Press Enter to continue...')
             elif option == 0:
+                print("Thanks for using Event_Control. Goodbye!")
                 exit()
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
@@ -246,7 +249,7 @@ class Interface:
     def show_user_menu(self):
         while True:
             self.clear_screen()
-            print(f'=== Staff Menu | Logged: {self.system.get_logged_user().name} ===')
+            print(f'=== User Menu | Logged: {self.system.get_logged_user().name} ===')
             print('[1] View all shows')
             print('[2] Add show to favourite')
             print('[3] Remove show from favourite')
@@ -271,7 +274,10 @@ class Interface:
                 self.user_functions.view_favorite_shows()
             elif option == 5:
                 self.user_functions.logout_user()
+                print('\033[0:32:0mUser logged out successfully.\033[0m')
+                input('Press Enter to continue...')
             elif option == 0:
+                print("Thanks for using Event_Control. Goodbye!")
                 exit()
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
