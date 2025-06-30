@@ -10,19 +10,35 @@ def validate_id(user_id: int) -> int:
 def validate_name(name: str) -> str:
     if not name or not isinstance(name, str):
         raise ValueError("Invalid name")
-    return name.strip()
-
+    
+    name = name.strip()
+    if len(name) < 2:
+        raise ValueError ('Name too short.')
+    
+    return name
 
 def validate_email(email: str) -> str:
     if not email or not isinstance(email, str):
         raise ValueError("Invalid email")
-    return email.strip()
+    
+    email = email.strip()
+    if '@' not in email or '.' not in email.split('@')[-1]:
+        raise ValueError ('Email must contain "@" and a valid domain.')
+    
+    return email
 
 
 def validate_password(password: str) -> str:
     if not isinstance(password, str) or len(password) < 6:
         raise ValueError("Passwords must be at least 6 characters.")
     return password
+
+# Valida se o número digitado era um número inteiro mesmo ou se era outra coisa
+def safe_int_input(prompt: str) -> int | None:
+    try:
+        return int(input(prompt))
+    except ValueError:
+        return None
 
 # Limpa o cpf que foi cadastrado para apenas numeros e retorna
 def sanitize_cpf(raw_cpf: str) -> str:
@@ -35,11 +51,11 @@ def validate_cpf(cpf: str) -> str:
     cpf = sanitize_cpf(cpf)
 
     if not cpf.isdigit():
-        raise ValueError("Invalid cpf: must contain only digits")
+        raise ValueError("Invalid CPF: must contain only digits")
     if len(cpf) != 11:
-        raise ValueError("Invalid cpf: must have 11 digits")
+        raise ValueError("Invalid CPF: must have 11 digits")
     if cpf == cpf[0] * 11:
-        raise ValueError("Invalid cpf: repeated digits")
+        raise ValueError("Invalid CPF: repeated digits")
 
     # Valida o primeiro digito do verificador
     soma = 0
@@ -51,7 +67,7 @@ def validate_cpf(cpf: str) -> str:
     else:
         digit1 = 11 - resto
     if digit1 != int(cpf[9]):
-        raise ValueError("Invalid cpf: first check digit does not match")
+        raise ValueError("Invalid CPF: first check digit does not match")
 
     # Valida o segundo digito do verificador
     soma = 0
@@ -63,6 +79,6 @@ def validate_cpf(cpf: str) -> str:
     else:
         digit2 = 11 - resto
     if digit2 != int(cpf[10]):
-        raise ValueError("Invalid cpf: second check digit does not match")
+        raise ValueError("Invalid CPF: second check digit does not match")
 
     return cpf
