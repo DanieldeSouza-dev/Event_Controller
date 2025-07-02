@@ -5,12 +5,12 @@ from src.models.user import User
 from src.models.shows import Show
 
 class SystemController:
-    def __init__(self, users: list[User], staff: list[Staff], show: list[Show]):
+    def __init__(self, users: list[User], staff: list[Staff], shows: list[Show]):
         self.users = users
         self.staff = staff
-        self.show = show
-        self.current_user = None  # Usuário logado
-        self.current_staff = None  # Staff logado
+        self.shows = shows  # plural agora
+        self.current_user = None
+        self.current_staff = None
 
     def login_user(self, user_id: int, password: str) -> bool:
         user = authenticate_user(user_id, password, self.users)

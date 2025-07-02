@@ -2,6 +2,7 @@
 
 from src.core.system import SystemController
 from src.core.validators import safe_int_input
+from src.core.persistence import save_user_favorites  # Adicionado para salvar favoritos
 
 class UserFunctions:
     def __init__(self, system: SystemController):
@@ -17,7 +18,7 @@ class UserFunctions:
             if not logged_user:
                 print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
             else:
-                shows = self.system.show  # Corrigido para plural, igual ao SystemController
+                shows = self.system.shows
                 if not shows:
                     print('\033[0;33mNo shows available.\033[0m')
                 else:
@@ -36,17 +37,19 @@ class UserFunctions:
             logged_user = self.system.get_logged_user()
             if not logged_user:
                 print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                show_id = safe_int_input('Enter the Show ID: ')
-                if show_id is None:
-                    raise ValueError('Show ID must be a number.')
+                return
 
-                show_exists = any(show.show_id == show_id for show in self.system.show)
-                if not show_exists:
-                    print('\033[0;31mShow not found.\033[0m')
-                else:
-                    logged_user.add_favorites(show_id)
-                    print('\033[0;32mShow added to favorites.\033[0m')
+            show_id = safe_int_input('Enter the Show ID: ')
+            if show_id is None:
+                raise ValueError('Show ID must be a number.')
+
+            show_exists = any(show.show_id == show_id for show in self.system.shows)
+            if not show_exists:
+                print('\033[0;31mShow not found.\033[0m')
+            else:
+                logged_user.add_favorites(show_id)
+                save_user_favorites(logged_user)  # Salva após adicionar
+                print('\033[0;32mShow added to favorites.\033[0m')
 
         except Exception as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
@@ -62,21 +65,21 @@ class UserFunctions:
             logged_user = self.system.get_logged_user()
             if not logged_user:
                 print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
-            else:
-                show_id = safe_int_input('Enter the Show ID: ')
-                if show_id is None:
-                    raise ValueError('Show ID must be a number.')
+                return
 
-                success = logged_user.remove_favorites(show_id)
-                if success:
-                    print('\033[0;32mShow removed from favorites.\033[0m')
-                else:
-                    print('\033[0;33mShow not found in favorites.\033[0m')
+            show_id = safe_int_input('Enter the Show ID: ')
+            if show_id is None:
+                raise ValueError('Show ID must be a number.')
+
+            removed = logged_user.remove_favorites(show_id)
+            if removed:
+                save_user_favorites(logged_user)  # Salva após remover
+                print('\033[0;32mShow removed from favorites.\033[0m')
+            else:
+                print('\033[0;33mShow not found in favorites.\033[0m')
 
         except Exception as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
-
-        input('Press Enter to continue...')
 
     # Visualizar apenas os shows favoritos
     def view_favorite_shows(self):
@@ -88,18 +91,16 @@ class UserFunctions:
             if not logged_user:
                 print('\033[0;31mNo user logged in. Operation not allowed.\033[0m')
             else:
-                favorites = logged_user.favorite_shows
+                favorites = logged_user.get_favorite_shows(self.system.shows)
                 if not favorites:
                     print('\033[0;33mYou have no favorite shows.\033[0m')
                 else:
                     for show in favorites:
-                        print(f'ID: {show.show_id} | Name: {show.name} | Date: {show.date}')
+                        print(f'ID: {show.show_id} | Name: {show.name} | Date: {show.date.strftime("%Y-%m-%d")}')
         except Exception as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
 
-        input('Press Enter to continue...')
-
     def logout_user(self):
-        self.system.logout()  # Chama logout que limpa ambos, user e staff, conforme system.py
+        self.system.logout()
         print('\033[0;33mUser logged out.\033[0m')
         input('Press Enter to return to login menu...')

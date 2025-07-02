@@ -1,6 +1,7 @@
-# Zona de importações
-
 from src.core.system import SystemController
+from src.core.persistence import (
+    save_staff, save_shows, save_users
+)
 from src.core.validators import (
     safe_int_input, validate_name, validate_email, validate_password, validate_cpf
 )
@@ -35,7 +36,9 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Cannot register user.\033[0m')
             else:
-                logged_staff.register_user(new_user)
+                # Passa a lista de usuários
+                logged_staff.register_user(new_user, self.system.users)
+                save_users(self.system.users)  # salva após cadastro
                 print('\033[0;32mUser registered successfully!\033[0m')
 
         except ValueError as e:
@@ -63,7 +66,9 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Cannot register staff.\033[0m')
             else:
-                logged_staff.register_staff(new_staff)
+                # Passa a lista de staff
+                logged_staff.register_staff(new_staff, self.system.staff)
+                save_staff(self.system.staff)  # salva após cadastro
                 print('\033[0;32mStaff registered successfully!\033[0m')
 
         except ValueError as e:
@@ -94,7 +99,8 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Cannot register show.\033[0m')
             else:
-                logged_staff.register_show(new_show)
+                logged_staff.register_show(new_show, self.system.shows)  # ou self.system.shows, verifique o nome exato
+                save_shows(self.system.shows)  # salva após cadastro
                 print('\033[0;32mShow registered successfully!\033[0m')
 
         except ValueError as e:
@@ -121,6 +127,7 @@ class StaffFunctions:
                     print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
                 else:
                     logged_staff.update_user_name(user, new_name)
+                    save_users(self.system.users)  # salva após atualização
                     print('\033[0;32mUser name updated successfully!\033[0m')
             else:
                 print('\033[0;31mUser not found.\033[0m')
@@ -148,6 +155,7 @@ class StaffFunctions:
                     print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
                 else:
                     logged_staff.update_user_password(user, new_password)
+                    save_users(self.system.users)  # salva após atualização
                     print('\033[0;32mUser password updated successfully!\033[0m')
             else:
                 print('\033[0;31mUser not found.\033[0m')
@@ -175,6 +183,7 @@ class StaffFunctions:
                     print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
                 else:
                     logged_staff.update_staff_name(staff, new_name)
+                    save_staff(self.system.staff)  # salva após atualização
                     print('\033[0;32mStaff name updated successfully!\033[0m')
             else:
                 print('\033[0;31mStaff not found.\033[0m')
@@ -202,6 +211,7 @@ class StaffFunctions:
                     print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
                 else:
                     logged_staff.update_staff_password(staff, new_password)
+                    save_staff(self.system.staff)  # salva após atualização
                     print('\033[0;32mStaff password updated successfully!\033[0m')
             else:
                 print('\033[0;31mStaff not found.\033[0m')
@@ -225,8 +235,13 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
             else:
-                logged_staff.delete_user(user_id)
-                print('\033[0;32mUser removed successfully!\033[0m')
+                # Passa a lista de usuários
+                deleted = logged_staff.delete_user(self.system.users, user_id)
+                if deleted:
+                    save_users(self.system.users)  # salva após remoção
+                    print('\033[0;32mUser removed successfully!\033[0m')
+                else:
+                    print('\033[0;31mUser not found.\033[0m')
 
         except ValueError as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
@@ -246,8 +261,13 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
             else:
-                logged_staff.delete_staff(staff_id)
-                print('\033[0;32mStaff removed successfully!\033[0m')
+                # Passa a lista de staff
+                deleted = logged_staff.delete_staff(self.system.staff, staff_id)
+                if deleted:
+                    save_staff(self.system.staff)  # salva após remoção
+                    print('\033[0;32mStaff removed successfully!\033[0m')
+                else:
+                    print('\033[0;31mStaff not found.\033[0m')
 
         except ValueError as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
@@ -267,8 +287,13 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
             else:
-                logged_staff.delete_show(show_id)
-                print('\033[0;32mShow removed successfully!\033[0m')
+                # Passa a lista de shows
+                deleted = logged_staff.delete_show(self.system.shows, show_id)
+                if deleted:
+                    save_shows(self.system.shows)  # salva após remoção
+                    print('\033[0;32mShow removed successfully!\033[0m')
+                else:
+                    print('\033[0;31mShow not found.\033[0m')
 
         except ValueError as e:
             print(f'\033[0;31mError: {str(e)}\033[0m')
@@ -322,7 +347,7 @@ class StaffFunctions:
             if not logged_staff:
                 print('\033[0;31mNo staff logged in. Operation not allowed.\033[0m')
             else:
-                shows = self.system.show
+                shows = self.system.shows
                 if not shows:
                     print('\033[0;33mNo shows registered.\033[0m')
                 else:

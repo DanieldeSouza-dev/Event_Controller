@@ -18,7 +18,9 @@ class Interface:
             elif self.system.get_logged_user():
                 self.show_user_menu()
             else:
-                self.show_login_menu()
+                should_exit = self.show_login_menu()
+                if should_exit:
+                    break
 
     # Menu inicial
     def show_login_menu(self):
@@ -33,15 +35,18 @@ class Interface:
             if choice is None:
                 print('\033[0:31:0mInvalid input. Please enter a number.\033[0m')
                 input('Press Enter to continue...')
-                continue
 
             if choice == 1:
                 self.login_user_flow()
+            if self.system.get_logged_user():
+                break  # login bem-sucedido -> sair do loop
             elif choice == 2:
                 self.login_staff_flow()
+                if self.system.get_logged_staff():
+                    break  # login bem-sucedido -> sair do loop
             elif choice == 0:
-                print('See you later!')
-                break
+                print("Thanks for using Event Control. Goodbye!")
+                return True
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
                 input('Press Enter to continue...')
@@ -61,9 +66,9 @@ class Interface:
                 print('\033[0:31:0mLogin failed. Check your ID or password.\033[0m')
         except ValueError:
             print('\033[0:31:0mInvalid input. ID must be a number.\033[0m')
-        input('Press Enter to continue...')
 
     # Menu de Login User
+
     def login_user_flow(self):
         self.system.clear_screen()
         try:
@@ -78,7 +83,6 @@ class Interface:
                 print('\033[0:31:0mLogin failed. Please check your ID or password.\033[0m')
         except ValueError:
             print('\033[0:31:0mInvalid input. ID must be a number.\033[0m')
-        input('Press Enter to continue...')
 
     # Menu de funcionalidade Staff
     def show_staff_menu(self):
@@ -110,10 +114,9 @@ class Interface:
             elif option == 5:
                 self.staff_functions.logout_staff()
                 print('\033[0:32:0mStaff logged out successfully.\033[0m')
-                input('Press Enter to continue...')
                 break
             elif option == 0:
-                print("Thanks for using Event_Control. Goodbye!")
+                print("Thanks for using Event Control. Goodbye!")
                 exit()
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')
@@ -260,10 +263,9 @@ class Interface:
             elif option == 5:
                 self.user_functions.logout_user()
                 print('\033[0:32:0mUser logged out successfully.\033[0m')
-                input('Press Enter to continue...')
                 break
             elif option == 0:
-                print("Thanks for using Event_Control. Goodbye!")
+                print("Thanks for using Event Control. Goodbye!")
                 exit()
             else:
                 print('\033[0:31:0mInvalid option. Please try again!\033[0m')

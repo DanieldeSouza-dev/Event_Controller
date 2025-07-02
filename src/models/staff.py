@@ -1,26 +1,28 @@
-#zona de importações
+# Zona de importações
 
 from __future__ import annotations
 from datetime import datetime
-from typing import List # Importa uma biblioteca que permite usar um List mais robusto e mais acessivel
+from typing import List
 from .person import Person
 from .user import User
 from .shows import Show
 
-#criação de classe Staff
+# Criação da classe Staff
 class Staff(Person):
     def __init__(self, user_id: int, name: str, email: str, cpf: str, password: str):
         super().__init__(user_id, name, email, cpf, password)
+        # Removido o atributo system para evitar dependência circular
 
-    #isso aqui vai servir para pegar o formato do dicionario de Person e converte para staff
+    # Método para converter Staff em dict (útil para salvar em JSON)
     def to_dict(self) -> dict:
         staff_data = super().to_dict()
         staff_data['is_staff'] = True
         staff_data['masked_cpf'] = self.masked_cpf
         return staff_data
 
+    # Cria um objeto Staff a partir de um dicionário (ex: JSON)
     @classmethod
-    def from_dict(cls, data: dict) -> 'Staff':
+    def from_dict(cls, data: dict) -> Staff:
         obj = cls.__new__(cls)
         obj._Person__id = data['id']
         obj._Person__name = data['name']
@@ -29,160 +31,90 @@ class Staff(Person):
         obj._Person__password = data['password_hash']
         return obj
 
+    # Registro de Shows
+    def register_show(self, new_show: Show, show_list: List[Show]) -> None:
+        show_list.append(new_show)
 
-    # Funções de gerenciamento:
-
-        # Shows:
-    def register_show(self, show_data: dict) -> 'Show':
-        # Valida a data digitada pelo usuario ou até mesmo pela staff
-        try:
-            raw_date = show_data['date']
-            if isinstance(raw_date, str):
-                try:
-                    date = datetime.strptime(raw_date, '%Y-%m-%d')
-                except ValueError:
-                    raise ValueError('Date must be in format YYYY-MM-DD.')
-            elif isinstance(raw_date, datetime):
-                date = raw_date
-            else:
-                raise ValueError('Date must be a datetime object of a YYYY-MM-DD string.')
-
-            new_show = Show(
-                show_id = show_data['id'],
-                name = show_data['name'],
-                date = date
-            )
-            return new_show
-        except (KeyError, ValueError) as e:
-            raise ValueError(f'Invalid show data: {e}')
-        
-    def view_shows(self, show_list: List[Show]) -> List[dict]:
+    # Visualização de Shows
+    def view_shows(self, show_list: List[Show]) -> None:
         if not isinstance(show_list, list):
-            raise ValueError ('Expected a list of shows')
-        displayed_shows = []
+            raise ValueError('Expected a list of shows')
+        if not show_list:
+            print('\033[0;33mNo shows registered.\033[0m')
+            return
         for show in show_list:
-            try:
-                show_info = {
-                    'ID': show.show_id,
-                    'Name': show.name,
-                    'Date': show.date
-                }
-                print(f'ID:{show.show_id} | Name:{show.name}')
-                displayed_shows.append(show_info)
-            except AttributeError as e:
-                print(f'Skipped invalid show entry: {e}')
-        return displayed_shows
-    
+            print(f'ID:{show.show_id} | Name:{show.name} | Date:{show.date.strftime("%Y-%m-%d")}')
 
-        # Usuários:    
-    def register_user(self, user_data: dict) -> 'User':
-        try:
-            password = user_data['password']
-            new_user = User(
-                user_id = user_data['id'],
-                name = user_data['name'],
-                email = user_data['email'],
-                cpf = user_data['cpf'],
-                password = password
-            )
-            return new_user
-        except (KeyError, ValueError) as e:
-            raise ValueError(f'Invalid user data: {e}')
+    # Registro de Usuários
+    def register_user(self, user: User, users_list: List[User]) -> None:
+        users_list.append(user)
 
-    # Função para ver o usuários cadastrados
-    def view_user(self, users: List[User]) -> List[dict]:
-        if not isinstance(users, list):
-            raise ValueError ('Expected a list of users')
+    # Visualização de Usuários
+    def view_user(self, users_list: List[User]) -> None:
+        if not isinstance(users_list, list):
+            raise ValueError('Expected a list of users')
+        if not users_list:
+            print('\033[0;33mNo users registered.\033[0m')
+            return
+        for user in users_list:
+            print(f'ID:{user.id} | Name:{user.name} | Email:{user.email} | CPF:{user.masked_cpf}')
 
-        displayed_users = []
-        for user in users:
-            try:
-                user_info = {
-                  'ID': user.id,
-                  'Name': user.name,
-                  'Email': user.email,
-                  'CPF': user.cpf
-                }
-                print(f'ID:{user.id} | Name:{user.name}')
-                displayed_users.append(user_info)
-            except AttributeError as e:
-                print(f'Skipped invalid user entry: {e}')
-
-        return displayed_users
-
+    # Atualizar nome do usuário
     def update_user_name(self, user: User, new_name: str) -> None:
         user.update_name(new_name)
 
+    # Atualizar senha do usuário
     def update_user_password(self, user: User, new_password: str) -> None:
         user.update_password(new_password)
 
+    # Registro de Staff (passar objeto Staff e lista para adicionar)
+    def register_staff(self, new_staff: Staff, staff_list: List[Staff]) -> None:
+        staff_list.append(new_staff)
 
-        # Staff:
-    def register_staff (self, staff_data: dict) -> 'Staff':
-        try:
-            password = staff_data['password']
-            new_staff = Staff(
-                user_id=staff_data['id'],
-                name=staff_data['name'],
-                email=staff_data['email'],
-                cpf=staff_data['cpf'],
-                password=password
-            )
-            return new_staff
-        except (KeyError, ValueError) as e:
-            raise ValueError(f'Invalid staff data: {e}')
-
-    def view_staff(self, staff_list: List[Staff]) -> List[dict]:
+    # Visualização de Staff
+    def view_staff(self, staff_list: List[Staff]) -> None:
         if not isinstance(staff_list, list):
-            raise ValueError ('Expected a list of staff')
-
-        displayed_staff = []
+            raise ValueError('Expected a list of staff')
+        if not staff_list:
+            print('\033[0;33mNo staff registered.\033[0m')
+            return
         for staff_member in staff_list:
-            try:
-                staff_info = {
-                    'ID': staff_member.id,
-                    'Name': staff_member.name,
-                    'Email': staff_member.email,
-                    'CPF': staff_member.cpf
-                }
-                print(f'ID:{staff_member.id} | Name:{staff_member.name}')
-                displayed_staff.append(staff_info)
-            except AttributeError as e:
-                print(f'Skipped invalid staff entry: {e}')
+            print(f'ID:{staff_member.id} | Name:{staff_member.name} | Email:{staff_member.email} | CPF:{staff_member.masked_cpf}')
 
-        return displayed_staff
-
-    def update_staff_name(self, staff: 'Staff', new_name: str) -> None:
+    # Atualizar nome do staff
+    def update_staff_name(self, staff: Staff, new_name: str) -> None:
         staff.update_name(new_name)
 
-    def update_staff_password(self, staff: 'Staff', new_password: str) -> None:
+    # Atualizar senha do staff
+    def update_staff_password(self, staff: Staff, new_password: str) -> None:
         staff.update_password(new_password)
 
-    # Zona criada para deletar usuário, staff e shows caso necessário
-
+    # Deletar usuário pelo ID
     def delete_user(self, users_list: List[User], user_id: int) -> bool:
         for i, user in enumerate(users_list):
             if user.id == user_id:
                 del users_list[i]
-                print(f'Deleted user {user.id} from list {i}')
+                print(f'User with ID {user_id} deleted successfully.')
                 return True
-        print(f'User {user_id} not found.')
+        print(f'User with ID {user_id} not found.')
         return False
 
+    # Deletar staff pelo ID
     def delete_staff(self, staff_list: List[Staff], staff_id: int) -> bool:
         for i, staff in enumerate(staff_list):
             if staff.id == staff_id:
                 del staff_list[i]
-                print(f'Deleted staff {staff.id} from list {i}')
+                print(f'Staff with ID {staff_id} deleted successfully.')
                 return True
-        print(f'Staff {staff_id} not found.')
+        print(f'Staff with ID {staff_id} not found.')
         return False
 
+    # Deletar show pelo ID
     def delete_show(self, show_list: List[Show], show_id: int) -> bool:
         for i, show in enumerate(show_list):
             if show.show_id == show_id:
                 del show_list[i]
-                print(f'Deleted show {show.show_id} from list {i}')
+                print(f'Show with ID {show_id} deleted successfully.')
                 return True
-        print(f'Show {show_id} not found.')
+        print(f'Show with ID {show_id} not found.')
         return False
