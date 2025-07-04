@@ -143,6 +143,7 @@ Includes:
     - Upcoming event reminders
 
 - Password input masking during CLI interactions for improved security and privacy.
+- Binary search on the ``find_id`` function.
 
 
 ## ▶️ How to Run
